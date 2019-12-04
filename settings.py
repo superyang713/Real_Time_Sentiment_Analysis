@@ -1,0 +1,2 @@
+tracking = ["apple"]
+languages = ["en"]
