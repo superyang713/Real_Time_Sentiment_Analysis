@@ -20,10 +20,11 @@ class MyStreamListener(tweepy.StreamListener):
             return True
 
         id_str = status.id_str
+        created_at = status.created_at
         text = status.text
-        print(text)
+        user_location = status.user.location
 
-        insert_sql = "INSERT INTO {} (id_str, text) VALUES (%s, %s) ".format(settings.table_name)
+        insert_sql = "INSERT INTO {} (id_str, created_at, text, user_location) VALUES (%s, %s) ".format(settings.table_name)
 
         val = (id_str, text)
 
