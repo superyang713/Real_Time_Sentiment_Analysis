@@ -9,6 +9,7 @@ import flair
 from utils import extract_data
 import settings
 
+flair_sentiment = flair.models.TextClassifier.load('en-sentiment')
 
 def clean_text(text):
     # remove hyperlink
@@ -25,12 +26,17 @@ def clean_text(text):
 
     return text
 
+def analyze_sentiment(text):
+    sentence = flair.data.Sentence(text)
+    flair_sentiment.predict(sentence)
+    total_sentiment = sentence.labels
+    return total_sentiment
+
 
 df = extract_data(settings.table_name)
 
-df["text_punct_removed"] = df["text"].apply(remove_punctuation)
-flair_sentiment = flair.models.TextClassifier.load('en-sentiment')
-s = flair.data.Sentence(sentence)
-flair_sentiment.predict(s)
-total_sentiment = s.labels
-total_sentiment
+df["text_punct_removed"] = df["text"].apply(clean_text)
+df["sentiment"] = df["text_punct_removed"].apply(analyze_sentiment)
+
+print(df.head())
+print(df["sentiment"].iloc[2])
