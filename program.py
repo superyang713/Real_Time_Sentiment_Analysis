@@ -24,4 +24,3 @@ myStream.filter(
     languages=settings.languages,
     track=settings.tracking
 )
-

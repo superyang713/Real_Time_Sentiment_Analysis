@@ -33,10 +33,10 @@ def analyze_sentiment(text):
     return total_sentiment
 
 
-df = extract_data(settings.table_name)
+# df = extract_data(settings.table_name)
 
-df["text_punct_removed"] = df["text"].apply(clean_text)
-df["sentiment"] = df["text_punct_removed"].apply(analyze_sentiment)
+# df["text_punct_removed"] = df["text"].apply(clean_text)
+# df["sentiment"] = df["text_punct_removed"].apply(analyze_sentiment)
 
-print(df.head())
-print(df["sentiment"].iloc[2])
+# print(df.head())
+# print(df["sentiment"].iloc[2])
