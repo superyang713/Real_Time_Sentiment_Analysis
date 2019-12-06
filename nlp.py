@@ -4,12 +4,18 @@ Contains various functions to process texts, mainly tweets.
 
 import string
 import re
-import flair
+import pandas as pd
+from textblob import TextBlob
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 
 from utils import extract_data
 import settings
 
-flair_sentiment = flair.models.TextClassifier.load('en-sentiment')
+nltk.download("stopwords")
+nltk.download("punkt")
+
 
 def clean_text(text):
     # remove hyperlink
@@ -26,17 +32,20 @@ def clean_text(text):
 
     return text
 
+def remove_stopwords(text):
+    stop_words = set(stopwords.words("english"))
+    word_tokens = word_tokenize(text)
+    filtered_sentence = [w for w in word_tokens if not w in stop_words]
+    filtered_sentence = " ".join(filtered_sentence)
+    return filtered_sentence
+
+def preprocess_text(text):
+    text = clean_text(text)
+    text = remove_stopwords(text)
+    return text
+
 def analyze_sentiment(text):
-    sentence = flair.data.Sentence(text)
-    flair_sentiment.predict(sentence)
-    total_sentiment = sentence.labels
-    return total_sentiment
-
-
-# df = extract_data(settings.table_name)
-
-# df["text_punct_removed"] = df["text"].apply(clean_text)
-# df["sentiment"] = df["text_punct_removed"].apply(analyze_sentiment)
-
-# print(df.head())
-# print(df["sentiment"].iloc[2])
+    text = TextBlob(text)
+    polarity = text.sentiment.polarity
+    subjectivity = text.sentiment.subjectivity
+    return polarity, subjectivity
