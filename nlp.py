@@ -17,6 +17,40 @@ nltk.download("stopwords")
 nltk.download("punkt")
 
 
+class PreProcessTweets:
+    def __init__(self):
+        self._stopwords = set(stopwords.words('english') + list(string.punctuation) + ['AT_USER','URL'])
+
+    def processTweets(self, list_of_tweets):
+        processedTweets=[]
+        for tweet in list_of_tweets:
+            processedTweets.append((self._processTweet(tweet["text"]),tweet["label"]))
+        return processedTweets
+
+    def _processTweet(self, tweet):
+        # convert text to lower-case
+        tweet = tweet.lower()
+
+        # remove URLs
+        tweet = re.sub('((www\.[^\s]+)|(https?://[^\s]+))', 'URL', tweet)
+
+        # remove usernames
+        tweet = re.sub('@[^\s]+', 'AT_USER', tweet)
+
+        # remove the # in #hashtag
+        tweet = re.sub(r'#([^\s]+)', r'\1', tweet)
+
+        # remove numbers
+        tweet = re.sub(r"[0-9]+", "\1", tweet)
+
+        # remove non-ascii characters, mainly different languages and emojis.
+        tweet = tweet.encode('ascii', 'ignore').decode()
+
+        # remove repeated characters (helloooooooo into hello)
+        tweet = word_tokenize(tweet)
+
+        return [word for word in tweet if word not in self._stopwords]
+
 def clean_text(text):
     # remove hyperlink
     text = re.sub(r"(?:https?\://)\S+", "", text)

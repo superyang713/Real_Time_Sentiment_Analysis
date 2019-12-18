@@ -1,19 +1,12 @@
 import tweepy
-import settings
-import credentials
 from stream import MyStreamListener
 
+import settings
+import credentials
+from utils import connect_api
 
-auth = tweepy.OAuthHandler(
-    credentials.API_KEY,
-    credentials.API_SECRECT_KEY
-)
-auth.set_access_token(
-    credentials.ACCESS_TOKEN,
-    credentials.ACCESS_TOKEN_SECRECT
-)
 
-api = tweepy.API(auth)
+api = connect_api()
 
 myStreamListener = MyStreamListener()
 myStream = tweepy.Stream(
