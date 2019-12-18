@@ -3,7 +3,14 @@ import tweepy
 import credentials
 import settings
 from database import Connection
-from nlp import preprocess_text, analyze_sentiment
+from nlp import preprocess_text, analyze_sentiment, PreProcessTweets
+from model import extract_features
+import pickle
+
+
+f = open('./data/classifier.pickle', 'rb')
+classifier = pickle.load(f)
+f.close()
 
 
 class MyStreamListener(tweepy.StreamListener):
@@ -25,8 +32,16 @@ class MyStreamListener(tweepy.StreamListener):
         text = status.text
         user_location = status.user.location
 
-        preprocessed_text = preprocess_text(text)
-        polarity = analyze_sentiment(preprocessed_text)[0]
+        tweet = {
+            "text": text,
+            "label": None
+        }
+        tweet_processor = PreProcessTweets()
+        processed_tweet = tweet_processor.process_tweets([tweet])
+        polarity = classifier.classify(extract_features(processed_tweet[0]))
+        print(polarity)
+        print(processed_tweet)
+        print(extract_features(processed_tweet[0]))
 
         insert_sql = """
         INSERT INTO {}

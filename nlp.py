@@ -21,13 +21,13 @@ class PreProcessTweets:
     def __init__(self):
         self._stopwords = set(stopwords.words('english') + list(string.punctuation) + ['AT_USER','URL'])
 
-    def processTweets(self, list_of_tweets):
-        processedTweets=[]
+    def process_tweets(self, list_of_tweets):
+        processed_tweets = []
         for tweet in list_of_tweets:
-            processedTweets.append((self._processTweet(tweet["text"]),tweet["label"]))
-        return processedTweets
+            processed_tweets.append((self._process_tweet(tweet["text"]),tweet["label"]))
+        return processed_tweets
 
-    def _processTweet(self, tweet):
+    def _process_tweet(self, tweet):
         # convert text to lower-case
         tweet = tweet.lower()
 
@@ -50,6 +50,7 @@ class PreProcessTweets:
         tweet = word_tokenize(tweet)
 
         return [word for word in tweet if word not in self._stopwords]
+
 
 def clean_text(text):
     # remove hyperlink

@@ -1,4 +1,4 @@
-tracking = ["apple music"]
+tracking = ["Microsoft"]
 languages = ["en"]
 table_name = "test"
 

@@ -1,73 +1,55 @@
+import nltk
+
 import csv
-import time
+import pickle
 
-import tweepy
-
-from utils import connect_api
+from nlp import PreProcessTweets
 
 
-def build_test_set(search_keyword):
-    api = connect_api()
-    try:
-        tweets_fetched = api.search(search_keyword, count=100)
-        print("Fetched " + str(len(tweets_fetched)) + " tweets for the term " +
-              search_keyword)
-        return [{
-            "text": status.text,
-            "label": None
-        } for status in tweets_fetched]
-    except:
-        print("Unfortunately, something went wrong..")
-        return None
+def build_volcabulary(processed_train):
+    all_words = []
+
+    for (words, sentiment) in processed_train:
+        all_words.extend(words)
+
+    word_list = nltk.FreqDist(all_words)
+    word_features = word_list.keys()
+
+    return word_features
 
 
-# search_term = input("Enter a search keyword:")
-# test_set = build_test_set(search_term)
+def extract_features(tweet):
+    features = {}
+    for word in word_features:
+        features['contains(%s)' % word] = (word in tweet)
+    return features
 
-# print(test_set[0:4])
+
+with open("./data/training.csv") as f:
+    train = csv.DictReader(f)
+    tweet_processor = PreProcessTweets()
+    processed_train = tweet_processor.process_tweets(train)
+
+# Now we can extract the features and train the classifier
+word_features = build_volcabulary(processed_train)
 
 
-def build_training_set(corpse_file, tweet_file):
-    api = connect_api()
-    corpus = []
-    with open(corpus_file, 'r') as csvfile:
-        lineReader = csv.reader(csvfile, delimiter=',', quotechar="\"")
-        for row in lineReader:
-            corpus.append({
-                "tweet_id": row[2],
-                "label": row[1],
-                "topic": row[0]
-            })
+# training_features = nltk.classify.apply_features(
+#     extract_features,
+#     processed_train
+# )
 
-    rate_limit = 180
-    sleep_time = 5
+# NBayesClassifier = nltk.NaiveBayesClassifier.train(training_features)
+# print("Classifier accuracy percent:",(nltk.classify.accuracy(NBayesClassifier, training_features))*100)
 
-    training_set = []
-    for tweet in corpus:
-        try:
-            status = api.get_status(tweet["tweet_id"])
-            print("Tweet fetched" + status.text)
-            tweet["text"] = status.text
-            training_set.append(tweet)
-            time.sleep(sleep_time)
-        except:
-            continue
+# f = open('./data/classifier.pickle', 'rb')
+# classifier = pickle.load(f)
+# f.close()
 
-    with open(tweet_file, 'w') as csvfile:
-        linewriter = csv.writer(csvfile, delimiter=',', quotechar="\"")
-        for tweet in training_set:
-            try:
-                linewriter.writerow([
-                    tweet["tweet_id"],
-                    tweet["text"],
-                    tweet["label"],
-                    tweet["topic"]
-                ])
-            except Exception as e:
-                print(e)
-    return training_set
+# NBResultLabels = [
+#     classifier.classify(extract_features(tweet[0]))
+#     for tweet in processed_train[-100:]
+# ]
 
-corpus_file = "data/corpus.csv"
-tweet_file = "data/training.csv"
+# print(NBResultLabels)
 
-training_set = build_training_set(corpus_file, tweet_file)
